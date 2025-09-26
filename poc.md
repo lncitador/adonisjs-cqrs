@@ -19,10 +19,15 @@ The success of this POC will prove that it is possible to build a system where t
 ##### **Excluded Features:**
 
 - Implementation of `QueryBus` (its logic will be analogous to `CommandBus`).
-- Creation of `ace` commands for boilerplate generation.
 - A complete configuration file (`config/cqrs.ts`); a predefined path will be used for the POC.
 - Error handling and complex validations.
 - End-user documentation.
+
+##### **Architectural Enhancements Implemented:**
+
+- **Pub/Sub System for Commands:** A default publisher (`DefaultCommandPubSub`) using `rxjs` was implemented, allowing other parts of the application to observe dispatched commands.
+- **Test Factories:** A `CommandBusFactory` was created to simplify the instantiation of the `CommandBus` in isolated tests.
+- **Foundation for Ace Commands:** The basic structure for `stubs` has been created, paving the way for future implementation of boilerplate generation commands.
 
 #### **3. POC Requirements**
 
@@ -40,12 +45,12 @@ The success of this POC will prove that it is possible to build a system where t
 - **NFR-02: Low Coupling:** Handlers must not have direct knowledge of the container or the bus. Dependency injection should be the only interaction with the system.
 - **NFR-03: Testability:** The architecture must allow a handler or its dependencies to be easily replaced during tests, using features like `container.swap()`.
 
-#### **4. Business Rules (System Rules)**
+#### 4. Business Rules (System Rules)
 
-- **BR-01: Naming Convention:** To be discovered, a handler file must follow a naming pattern, for example, `[CommandName]Handler.ts`.
-- **BR-02: Default Export:** Each handler file must contain a single class exported as `export default`, a necessary premise for the functioning of `module expressions`.
-- **BR-03: Constructor Dependencies:** All handler dependencies must be declared as constructor parameters and the class must be marked with the `@inject()` decorator so that `@adonisjs/fold` can resolve them.
-- **BR-04: Command-Handler Association:** There will be a one-to-one association between a Command and its Handler, derived from the naming convention.
+- **BR-01: Naming Convention for Discovery:** To be discovered by the provider, a handler file must follow a naming pattern (e.g., `create_user_handler.ts`). This convention is used for file discovery only.
+- **BR-02: Handler Association via Decorator:** Every handler class must be decorated with `@CommandHandler(Command)`, passing the corresponding command class. This decorator uses `reflect-metadata` to create an explicit and robust link between the command and its handler.
+- **BR-03: Default Export:** Each handler file must contain a single class exported as `export default`, a necessary premise for the functioning of lazy loading (`module expressions`).
+- **BR-04: Dependency Injection:** All handler dependencies must be declared as constructor parameters, and the handler class must be marked with the `@inject()` decorator so that `@adonisjs/fold` can resolve them.
 
 #### **5. Execution Plan and Tasks (Step by Step)**
 
@@ -74,7 +79,9 @@ The success of this POC will prove that it is possible to build a system where t
   - Develop a function that uses `glob` and `picomatch` to scan the `app/commands/handlers/` directory and find all files ending in `_handler.ts`.
 - **Task 3.2: Implement Registration Logic in `ServiceProvider`:**
   - In the `ServiceProvider`'s `boot` method, call the discovery function.
-  - For each file found, extract the command name by convention and register in the `CommandBus` the association between the command name and the reference to its module (using a `module expression` or a `module importer`).
+  - For each file found, the provider will dynamically import it to access the handler class.
+  - It will then use `reflect-metadata` to read the command associated via the `@CommandHandler` decorator.
+  - Finally, it will register in the `CommandBus` the association between the command's unique ID (also stored in metadata) and a lazy-loading reference to its handler module.
 
 ##### **Phase 4: Validation with Automated Tests (Japa)**
 
