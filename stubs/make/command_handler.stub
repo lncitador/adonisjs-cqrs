@@ -1,0 +1,22 @@
+{{#var handlerName = string(name).singular().pascalCase().toString()}}
+{{#var commandName = string(name).singular().pascalCase().toString()}}
+{{#var handlerFileName = string(name).singular().snakeCase().suffix('_handler').ext('.ts').toString()}}
+{{#var commandFileName = string(name).singular().snakeCase().suffix('_command').toString()}}
+{{{
+  exports({
+    to: app.makePath(destinationDir, handlerFileName)
+  })
+}}}
+import { CommandHandler } from 'adonisjs-cqrs/decorators'
+import { BaseCommandHandler } from 'adonisjs-cqrs/types'
+import {{ commandName }}Command from './{{ commandFileName }}.js'
+
+@CommandHandler({{ commandName }}Command)
+export default class {{ handlerName }}Handler implements BaseCommandHandler<{{ commandName }}Command> {
+
+  async execute(command: {{ commandName }}Command) {
+    // Command logic here
+
+    return { success: true }
+  }
+}

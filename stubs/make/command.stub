@@ -1,0 +1,17 @@
+{{#var commandName = string(name).singular().pascalCase().toString()}}
+{{#var commandFileName = string(name).singular().snakeCase().suffix('_command').ext('.ts').toString()}}
+{{{
+  exports({
+    to: app.makePath(destinationDir, commandFileName)
+  })
+}}}
+import { Command } from 'adonisjs-cqrs/core'
+
+// Define the result type for this command
+export type I{{ commandName }}Result = { success: boolean }
+
+export default class {{ commandName }}Command extends Command<I{{ commandName }}Result> {
+  constructor() {
+    super()
+  }
+}
