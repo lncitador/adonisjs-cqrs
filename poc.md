@@ -62,26 +62,30 @@ The success of this POC will prove that it is possible to build a system where t
 
 ##### **Phase 2: Core System Implementation**
 
-- **Task 2.1: Create the `CommandBus`:**
-  - Develop the `CommandBus` class with an internal map to register handlers and a `dispatch` method.
-  - The `dispatch` logic will use a module importer (such as `moduleImporter` or `moduleExpression`) to dynamically load the handler class before instantiating it with `container.make()`.
-- **Task 2.2: Create the `ServiceProvider`:**
+- **Task 2.1: Create the `HandlersManager`:**
+  - Develop a `HandlersManager` class that will act as a centralized, singleton storage for all handler registrations (Commands, Queries, etc.).
+  - This class will contain internal maps for each handler type and provide generic methods like `registerHandler(type, ...)` and `getHandler(type, ...)`.
+- **Task 2.2: Create the `CommandBus`:**
+  - Develop the `CommandBus` class. It will **not** have an internal map for handlers.
+  - Its constructor will receive the `HandlersManager` via dependency injection.
+  - The `dispatch` logic will use the `HandlersManager` to find the correct handler path before dynamically importing and instantiating it with `container.make()`.
+- **Task 2.3: Create the `ServiceProvider`:**
   - Create a `CqrsProvider.ts`.
-  - In the `register` method, register the `CommandBus` as a singleton using `this.app.container.singleton(CommandBus, ...)`.
-- **Task 2.3: Create an Example Handler:**
+  - In the `register` method, register both the `HandlersManager` and the `CommandBus` as singletons.
+- **Task 2.4: Create an Example Handler:**
   - Create a fictional service (e.g., `app/services/logger_service.ts`).
   - Create a command (`app/commands/create_user_command.ts`).
   - Create the corresponding handler (`app/commands/handlers/create_user_handler.ts`) that receives the `LoggerService` in its constructor, marked with `@inject()`.
 
-##### **Phase 3: Automatic Discovery Implementation**
+##### **Phase 3: Generic and Automatic Discovery Implementation**
 
-- **Task 3.1: Create the Discovery Module:**
-  - Develop a function that uses `glob` and `picomatch` to scan the `app/commands/handlers/` directory and find all files ending in `_handler.ts`.
+- **Task 3.1: Create the Generic Discovery Module:**
+  - Develop a generic `discoverHandlers(type, ...)` function that uses `glob` to scan directories.
+  - This function will read a type-specific list of directories from the configuration (e.g., `config.directories.command`).
 - **Task 3.2: Implement Registration Logic in `ServiceProvider`:**
-  - In the `ServiceProvider`'s `boot` method, call the discovery function.
-  - For each file found, the provider will dynamically import it to access the handler class.
-  - It will then use `reflect-metadata` to read the command associated via the `@CommandHandler` decorator.
-  - Finally, it will register in the `CommandBus` the association between the command's unique ID (also stored in metadata) and a lazy-loading reference to its handler module.
+  - In the `ServiceProvider`'s `boot` method, call the `discoverHandlers('command', ...)` function.
+  - The discovery function will iterate through found files, dynamically import them, and use `reflect-metadata` to read the subject (e.g., Command class) associated via the decorator.
+  - Finally, it will call `handlersManager.registerHandler(...)` to populate the central storage with the association between the subject's unique ID and a lazy-loading reference to its handler module.
 
 ##### **Phase 4: Validation with Automated Tests (Japa)**
 
