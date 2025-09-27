@@ -1,8 +1,9 @@
 import { Application } from '@adonisjs/core/app'
 import { CommandBus } from '../src/buses/command.js'
-import { discoverCommandHandlers } from '../src/core/discovery.js'
+import { discoverHandlers } from '../src/core/discovery.js'
 import { CqrsConfig } from '../src/types/config.js'
 import { Logger } from '@adonisjs/core/logger'
+import { HandlersManager } from '../src/storages/handlers_manager.js'
 
 export default class CqrsProvider {
   #config: CqrsConfig
@@ -15,9 +16,15 @@ export default class CqrsProvider {
    * Register bindings to the container
    */
   register() {
+    this.app.container.singleton(HandlersManager, async (resolver) => {
+      const logger = await resolver.make(Logger)
+      return new HandlersManager(logger)
+    })
+
     this.app.container.singleton(CommandBus, async (resolver) => {
       const logger = await resolver.make(Logger)
-      return new CommandBus(this.app, logger, this.#config)
+      const handlersManager = await resolver.make(HandlersManager)
+      return new CommandBus(this.app, handlersManager, logger, this.#config)
     })
   }
 
@@ -25,9 +32,9 @@ export default class CqrsProvider {
    * The application has been booted
    */
   async boot() {
-    const commandBus = await this.app.container.make(CommandBus)
+    const handlersManager = await this.app.container.make(HandlersManager)
     const logger = await this.app.container.make(Logger)
 
-    await discoverCommandHandlers(this.app, logger, this.#config, commandBus)
+    await discoverHandlers(this.app, logger, this.#config, handlersManager, 'command')
   }
 }

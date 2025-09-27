@@ -4,11 +4,13 @@ import { Application } from '@adonisjs/core/app'
 import { CqrsConfig } from '../src/types/config.js'
 import { Logger } from '@adonisjs/core/logger'
 import { defineConfig } from '../src/define_config.js'
+import { HandlersManager } from '../src/storages/handlers_manager.js'
 
 type FactoryParameters = {
   app: Application<any>
   logger: Logger
   config: CqrsConfig
+  handlersManager: HandlersManager
 }
 
 export class CommandBusFactory {
@@ -39,6 +41,13 @@ export class CommandBusFactory {
   }
 
   /**
+   * Returns an instance of the HandlersManager class
+   */
+  #getHandlersManager() {
+    return this.#parameters.handlersManager || new HandlersManager(this.#getLogger())
+  }
+
+  /**
    * Merge factory params
    * @param params - Partial factory parameters to merge
    */
@@ -48,6 +57,11 @@ export class CommandBusFactory {
   }
 
   create() {
-    return new CommandBus(this.#getApp(), this.#getLogger(), this.#getConfig())
+    return new CommandBus(
+      this.#getApp(),
+      this.#getHandlersManager(),
+      this.#getLogger(),
+      this.#getConfig()
+    )
   }
 }

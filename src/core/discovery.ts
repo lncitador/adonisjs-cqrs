@@ -1,80 +1,77 @@
 import { glob } from 'glob'
-import { CommandBus } from '../buses/command.js'
-import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '../decorators/constants.js'
 import { CqrsConfig } from '../types/config.js'
 import { Application } from '@adonisjs/core/app'
 import { Logger } from '@adonisjs/core/logger'
+import { HandlersManager } from '../storages/handlers_manager.js'
+import { METADATA_MAP } from '../decorators/constants.js'
 
 /**
- * Discovers command handlers in the configured directories and registers them with the CommandBus
+ * Discovers handlers of a specific type in the configured directories.
  */
-export async function discoverCommandHandlers(
+export async function discoverHandlers(
   app: Application<any>,
   logger: Logger,
   config: CqrsConfig,
-  commandBus: CommandBus
+  handlersManager: HandlersManager,
+  type: keyof typeof METADATA_MAP
 ): Promise<void> {
   const { directories } = config
+  const discoveryDirs = (directories as any)[type] // Use as any to bypass strict type checking for now
+
+  if (!discoveryDirs || discoveryDirs.length === 0) {
+    logger.warn(`[CQRS] No directories configured for "${type}" handlers. Skipping discovery.`)
+    return
+  }
 
   try {
     let allHandlerFiles: string[] = []
-    for (const commandDir of directories.commands) {
-      const dirPath = app.makePath(commandDir)
+    for (const dir of discoveryDirs) {
+      const dirPath = app.makePath(dir)
       const handlerFiles = await glob(`${dirPath}/**/*_handler.ts`, {
         cwd: process.cwd(),
         absolute: true,
       })
-
-      logger.info(`[CQRS] Found ${handlerFiles.length} handlers in ${dirPath}`)
-
       allHandlerFiles.push(...handlerFiles)
     }
 
-    logger.info(`[CQRS] Discovered ${allHandlerFiles.length} command handlers`)
+    logger.info(`[CQRS] Discovered ${allHandlerFiles.length} "${type}" handlers`)
 
-    // Process each handler file
     for (const filePath of allHandlerFiles) {
       try {
-        await registerHandlerFromFile(filePath, commandBus)
+        await registerSubjectHandlerFromFile(filePath, handlersManager, type)
       } catch (error) {
         logger.error(`[CQRS] Error registering handler from ${filePath}:`, error)
-        // Continue processing other handlers even if one fails
       }
     }
   } catch (error) {
-    logger.error('[CQRS] Error during handler discovery:', error)
+    logger.error(`[CQRS] Error during "${type}" handler discovery:`, error)
     throw error
   }
 }
 
 /**
- * Registers a single handler from a file path
+ * Registers a single handler from a file path for a given subject type.
  */
-async function registerHandlerFromFile(filePath: string, commandBus: CommandBus): Promise<void> {
-  // Dynamic import of the handler module
+async function registerSubjectHandlerFromFile(
+  filePath: string,
+  handlersManager: HandlersManager,
+  type: keyof typeof METADATA_MAP
+): Promise<void> {
   const handlerModule = await import(filePath)
-
-  // Get the default export (handler class)
   const HandlerClass = handlerModule.default
 
   if (!HandlerClass) {
     throw new Error(`No default export found in ${filePath}`)
   }
 
-  // Get the command class from metadata
-  const commandClass = Reflect.getMetadata(COMMAND_HANDLER_METADATA, HandlerClass)
+  const handlerMetadataKey = METADATA_MAP[type].handler
+  const subjectClass = Reflect.getMetadata(handlerMetadataKey, HandlerClass)
 
-  if (!commandClass) {
-    throw new Error(`Handler ${HandlerClass.name} is not decorated with @CommandHandler`)
+  if (!subjectClass) {
+    throw new Error(
+      `Handler ${HandlerClass.name} is not decorated with the correct decorator for type "${type}"`
+    )
   }
 
-  // Get command metadata (including unique ID)
-  const commandMetadata = Reflect.getMetadata(COMMAND_METADATA, commandClass)
-
-  if (!commandMetadata) {
-    throw new Error(`Command ${commandClass.name} metadata not found`)
-  }
-
-  // Register the handler with the CommandBus using lazy loading
-  commandBus.registerHandler(commandClass, HandlerClass, filePath)
+  handlersManager.registerHandler(type, subjectClass, HandlerClass, filePath)
 }
