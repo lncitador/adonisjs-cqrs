@@ -1,5 +1,6 @@
 import { IgnitorFactory } from '@adonisjs/core/factories'
 import { defineConfig } from '../src/define_config.js'
+import { stubsRoot } from '../stubs/main.js'
 
 export const BASE_URL = new URL('./tmp/', import.meta.url)
 
@@ -11,26 +12,29 @@ export const IMPORTER = (filePath: string) => {
   return import(filePath)
 }
 
+type SetupAppOptions = {
+  importer?: typeof IMPORTER
+  config?: Record<string, any>
+}
+
 /**
  * Setup an AdonisJS app for testing
  */
-export async function setupApp() {
+export async function setupApp({ importer = IMPORTER, config = {} }: SetupAppOptions = {}) {
   const ignitor = new IgnitorFactory()
     .withCoreProviders()
     .withCoreConfig()
     .merge({
+      rcFileContents: {
+        providers: [() => import('../providers/cqrs_provider.js')],
+      },
       config: {
         cqrs: defineConfig({}),
+        ...config,
       },
     })
     .create(BASE_URL, {
-      importer: (filePath) => {
-        if (filePath.startsWith('./') || filePath.startsWith('../')) {
-          return import(new URL(filePath, BASE_URL).href)
-        }
-
-        return import(filePath)
-      },
+      importer,
     })
 
   const app = ignitor.createApp('web')
@@ -39,5 +43,17 @@ export async function setupApp() {
   const ace = await app.container.make('ace')
   ace.ui.switchMode('raw')
 
-  return { ace, app }
+  const stubManager = await app.stubs.create()
+
+  return {
+    ace,
+    app,
+    prepareStub: async (stubPath: string, data: Record<string, any>) => {
+      const stub = await stubManager.build(stubPath, {
+        source: stubsRoot,
+      })
+
+      return stub.prepare(data)
+    },
+  }
 }
