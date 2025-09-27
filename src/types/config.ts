@@ -1,9 +1,9 @@
 import { BaseCommandPublisher } from './command.js'
 
 type Directory = {
-  commands: string[]
-  // events: string[]
-  // queries: string[]
+  command?: string[]
+  // events?: string[]
+  // queries?: string[]
 }
 
 type Publishers = {

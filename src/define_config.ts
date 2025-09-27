@@ -2,7 +2,7 @@ import { CqrsConfig } from './types/config.js'
 
 const defaultConfig: CqrsConfig = {
   directories: {
-    commands: ['./app/**/commands'],
+    command: ['./app/**/commands'],
   },
   generator: {
     root: 'app',
