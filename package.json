@@ -42,8 +42,14 @@
     "index:commands": "adonis-kit index build/commands",
     "build": "npm run clean && tsup-node && npm run copy:templates && npm run index:commands"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "adonisjs",
+    "cqrs",
+    "event-sourcing",
+    "ddd",
+    "typescript"
+  ],
+  "author": "Walaff Fernandes <walaffonofre@icloud.com>",
   "license": "MIT",
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
