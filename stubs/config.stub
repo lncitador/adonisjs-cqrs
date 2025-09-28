@@ -17,12 +17,6 @@ export default defineConfig({
    * Directories where your commands and queries are located.
    * Handlers will be automatically discovered within these paths.
    * Supports glob patterns.
-   *
-   * @default
-   * { 
-   *   command: ['./app/**/commands'],
-   *   query: ['./app/**/queries'],
-   * }
    */
   directories: {
     command: ['./app/**/commands'],
@@ -45,7 +39,7 @@ export default defineConfig({
   // },
 
   /**
-   * Root directory for Ace generator commands (e.g., `make:command`).
+   * Root directory for Ace generator commands (e.g., \`make:command\`).
    * This defines the base path where new commands and queries will be created.
    *
    * @default 'app'

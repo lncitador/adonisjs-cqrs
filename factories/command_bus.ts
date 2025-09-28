@@ -1,10 +1,10 @@
-import { AppFactory } from '@adonisjs/application/factories'
 import { CommandBus } from '../src/buses/command.js'
 import { Application } from '@adonisjs/core/app'
 import { CqrsConfig } from '../src/types/config.js'
 import { Logger } from '@adonisjs/core/logger'
 import { defineConfig } from '../src/define_config.js'
 import { HandlersManager } from '../src/storages/handlers_manager.js'
+import { AppFactory } from '@adonisjs/core/factories/app'
 
 type FactoryParameters = {
   app: Application<any>
