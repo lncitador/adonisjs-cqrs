@@ -13,8 +13,7 @@ import {{ commandName }}Command from './{{ commandFileName }}.js'
 
 @CommandHandler({{ commandName }}Command)
 export default class {{ handlerName }}Handler implements BaseCommandHandler<{{ commandName }}Command> {
-
-  async execute(command: {{ commandName }}Command) {
+  async handle(command: {{ commandName }}Command) {
     // Command logic here
 
     return { success: true }
