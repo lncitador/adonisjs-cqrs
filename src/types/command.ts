@@ -15,17 +15,19 @@ export type BaseCommandHandler<TCommand extends BaseCommand = any, TResult = any
   TCommand extends Command<infer InferredCommandResult>
     ? {
         /**
-         * Executes a command.
-         * @param command The command to execute.
+         * Handles a command.
+         * @param command The command to handle.
+         * @returns A promise that resolves to the result of the command.
          */
-        execute(command: TCommand): Promise<InferredCommandResult>
+        handle(command: TCommand): Promise<InferredCommandResult>
       }
     : {
         /**
-         * Executes a command.
-         * @param command The command to execute.
+         * Handles a command.
+         * @param command The command to handle.
+         * @returns A promise that resolves to the result of the command.
          */
-        execute(command: TCommand): Promise<TResult>
+        handle(command: TCommand): Promise<TResult>
       }
 
 export interface BaseCommandPublisher<CommandBase extends BaseCommand = BaseCommand> {

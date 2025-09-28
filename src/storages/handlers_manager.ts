@@ -1,9 +1,8 @@
 import { Logger } from '@adonisjs/core/logger'
 import { Type } from '../types/shared.js'
 import { METADATA_MAP } from '../decorators/constants.js'
-// Futuramente: import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '...'
+import { DuplicateCommandHandlerException } from '../errors/main.js'
 
-// Centraliza os tipos de handlers
 export const HANDLER_TYPES = ['command', 'query', 'event'] as const
 export type HandlerType = (typeof HANDLER_TYPES)[number]
 
@@ -14,7 +13,6 @@ type HandlerRegistration = {
 }
 
 export class HandlersManager {
-  // Storage como um objeto literal (Record)
   #storage: Record<HandlerType, Map<string, HandlerRegistration>>
   #logger: Logger
 
@@ -36,8 +34,12 @@ export class HandlersManager {
     const subjectName = subjectClass.name
 
     if (!subjectId) {
-      this.#logger.error(`ID not found for ${subjectName}. Cannot register handler.`)
+      this.#logger.warn(`ID not found for ${subjectName}. Cannot register handler.`)
       return
+    }
+
+    if (this.#storage[type].has(subjectId)) {
+      throw new DuplicateCommandHandlerException(subjectId)
     }
 
     this.#storage[type].set(subjectId, {

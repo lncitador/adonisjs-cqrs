@@ -61,17 +61,13 @@ export class CommandBus<TCommand extends BaseCommand = BaseCommand>
     }
 
     try {
-      // Lazy load the handler module if not already loaded
       const handlerModule = await import(registration.filePath)
       const HandlerClass = handlerModule.default
 
-      // Instantiate the handler with dependency injection
-      const handler = await this.#app.container.make(HandlerClass)
+      const handler: BaseCommandHandler = await this.#app.container.make(HandlerClass)
 
-      // Execute the command
-      const result = await handler.execute(command)
+      const result = await handler.handle(command)
 
-      // Publish the command for observability
       this.#publisher.publish(command)
 
       return result
@@ -79,6 +75,10 @@ export class CommandBus<TCommand extends BaseCommand = BaseCommand>
       this.#logger.error(`[CQRS] Error executing command ${commandName}:`, error)
       throw error
     }
+  }
+
+  public getHandlers() {
+    return this.#handlersManager.getRegisteredHandlers('command')
   }
 
   private getCommandId(command: TCommand): string {
