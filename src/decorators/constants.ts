@@ -1,11 +1,15 @@
 export const COMMAND_METADATA = '__command__'
-export const COMMAND_HANDLER_METADATA = '__commandHandler__'
+export const COMMAND_HANDLER_METADATA = '__command_handler__'
+export const QUERY_METADATA = '__query__'
+export const QUERY_HANDLER_METADATA = '__query_handler__'
 
-// Mapeia o tipo de handler para suas chaves de metadados específicas
 export const METADATA_MAP = {
   command: {
-    handler: COMMAND_HANDLER_METADATA,
     subject: COMMAND_METADATA,
+    handler: COMMAND_HANDLER_METADATA,
   },
-  // query: { handler: QUERY_HANDLER_METADATA, subject: QUERY_METADATA },
-} as const
+  query: {
+    subject: QUERY_METADATA,
+    handler: QUERY_HANDLER_METADATA,
+  },
+}
