@@ -1,5 +1,6 @@
 import { Application } from '@adonisjs/core/app'
 import { CommandBus } from '../src/buses/command.js'
+import { QueryBus } from '../src/buses/query.js'
 import { discoverHandlers } from '../src/core/discovery.js'
 import { CqrsConfig } from '../src/types/config.js'
 import { Logger } from '@adonisjs/core/logger'
@@ -26,6 +27,12 @@ export default class CqrsProvider {
       const handlersManager = await resolver.make(HandlersManager)
       return new CommandBus(this.app, handlersManager, logger, this.#config)
     })
+
+    this.app.container.singleton(QueryBus, async (resolver) => {
+      const logger = await resolver.make(Logger)
+      const handlersManager = await resolver.make(HandlersManager)
+      return new QueryBus(this.app, handlersManager, logger, this.#config)
+    })
   }
 
   /**
@@ -36,5 +43,6 @@ export default class CqrsProvider {
     const logger = await this.app.container.make(Logger)
 
     await discoverHandlers(this.app, logger, this.#config, handlersManager, 'command')
+    await discoverHandlers(this.app, logger, this.#config, handlersManager, 'query')
   }
 }

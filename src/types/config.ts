@@ -1,21 +1,14 @@
 import { BaseCommandPublisher } from './command.js'
+import { BaseQueryPublisher } from './query.js'
 
-type Directory = {
-  command?: string[]
-  // events?: string[]
-  // queries?: string[]
-}
+export type DirectoryType = 'command' | 'query'
 
-type Publishers = {
-  commands?: BaseCommandPublisher
-  // events?: any
-  // queries?: any
-  // exceptions?: any
-}
-
-export interface CqrsConfig {
-  directories: Directory
-  publishers?: Publishers
+export type CqrsConfig = {
+  directories: Record<DirectoryType, string | string[]>
+  publishers?: {
+    commands?: BaseCommandPublisher
+    queries?: BaseQueryPublisher
+  }
   generator: {
     root: string
   }
