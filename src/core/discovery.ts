@@ -4,6 +4,7 @@ import { Application } from '@adonisjs/core/app'
 import { Logger } from '@adonisjs/core/logger'
 import { HandlersManager } from '../storages/handlers_manager.js'
 import { METADATA_MAP } from '../decorators/constants.js'
+import { InvalidHandlerException } from '../errors/main.js'
 
 /**
  * Discovers handlers of a specific type in the configured directories.
@@ -27,10 +28,8 @@ export async function discoverHandlers(
     let allHandlerFiles: string[] = []
     for (const dir of discoveryDirs) {
       const dirPath = app.makePath(dir)
-      const handlerFiles = await glob(`${dirPath}/**/*_handler.ts`, {
-        cwd: process.cwd(),
-        absolute: true,
-      })
+
+      const handlerFiles = await glob(`${dirPath}/**/*_handler.ts`)
       allHandlerFiles.push(...handlerFiles)
     }
 
@@ -60,16 +59,21 @@ async function registerSubjectHandlerFromFile(
   const handlerModule = await import(filePath)
   const HandlerClass = handlerModule.default
 
+  if (typeof HandlerClass !== 'function') {
+    throw new InvalidHandlerException(filePath, 'The default export is not a class.')
+  }
+
   if (!HandlerClass) {
-    throw new Error(`No default export found in ${filePath}`)
+    throw new InvalidHandlerException(filePath, 'No default export found.')
   }
 
   const handlerMetadataKey = METADATA_MAP[type].handler
   const subjectClass = Reflect.getMetadata(handlerMetadataKey, HandlerClass)
 
   if (!subjectClass) {
-    throw new Error(
-      `Handler ${HandlerClass.name} is not decorated with the correct decorator for type "${type}"`
+    throw new InvalidHandlerException(
+      filePath,
+      `The handler is not decorated with a valid decorator for the type "${type}".`
     )
   }
 
