@@ -1,0 +1,21 @@
+{{#var handlerName = string(name).singular().pascalCase().toString()}}
+{{#var queryName = string(name).singular().pascalCase().toString()}}
+{{#var handlerFileName = string(name).singular().snakeCase().suffix('_handler').ext('.ts').toString()}}
+{{#var queryFileName = string(name).singular().snakeCase().suffix('_query').toString()}}
+{{{
+  exports({
+    to: app.makePath(destinationDir, handlerFileName)
+  })
+}}}
+import { QueryHandler } from 'adonisjs-cqrs/decorators'
+import { BaseQueryHandler } from 'adonisjs-cqrs/types'
+import {{ queryName }}Query from './{{ queryFileName }}.js'
+
+@QueryHandler({{ queryName }}Query)
+export default class {{ handlerName }}Handler implements BaseQueryHandler<{{ queryName }}Query> {
+  async handle(query: {{ queryName }}Query) {
+    // Query logic here
+
+    return { success: true }
+  }
+}

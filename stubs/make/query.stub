@@ -1,0 +1,17 @@
+{{#var queryName = string(name).singular().pascalCase().toString()}}
+{{#var queryFileName = string(name).singular().snakeCase().suffix('_query').ext('.ts').toString()}}
+{{{
+  exports({
+    to: app.makePath(destinationDir, queryFileName)
+  })
+}}}
+import { Query } from 'adonisjs-cqrs/core'
+
+// Define the result type for this query
+export type I{{ queryName }}Result = { success: boolean }
+
+export default class {{ queryName }}Query extends Query<I{{ queryName }}Result> {
+  constructor() {
+    super()
+  }
+}
