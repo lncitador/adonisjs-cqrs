@@ -21,6 +21,7 @@
     "./buses": "./build/src/buses/main.js",
     "./decorators": "./build/src/decorators/main.js",
     "./types": "./build/src/types/main.js",
+    "./errors": "./build/src/errors/main.js",
     "./providers/cqrs_provider": "./build/providers/cqrs_provider.js",
     "./commands": "./build/commands/main.js"
   },
@@ -54,7 +55,7 @@
     "@japa/expect-type": "^2.0.3",
     "@japa/file-system": "^2.3.2",
     "@japa/runner": "^3.1.4",
-    "@swc/core": "^1.6.3",
+    "@swc/core": "1.13.19",
     "@types/node": "^20.14.5",
     "c8": "^10.1.2",
     "copyfiles": "^2.4.1",
@@ -104,6 +105,7 @@
       "./src/decorators/main.ts",
       "./src/buses/main.ts",
       "./src/types/main.ts",
+      "./src/errors/main.ts",
       "./providers/cqrs_provider.ts"
     ],
     "outDir": "./build",
