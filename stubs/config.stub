@@ -1,0 +1,56 @@
+{{{
+  exports({
+    to: app.configPath('cqrs.ts')
+  })
+}}}
+// config/cqrs.ts
+import { defineConfig } from 'adonisjs-cqrs'
+
+/**
+ * CQRS Configuration
+ *
+ * Configure directories for command/query discovery, custom publishers,
+ * and generator settings.
+ */
+export default defineConfig({
+  /**
+   * Directories where your commands and queries are located.
+   * Handlers will be automatically discovered within these paths.
+   * Supports glob patterns.
+   *
+   * @default
+   * { 
+   *   command: ['./app/**/commands'],
+   *   query: ['./app/**/queries'],
+   * }
+   */
+  directories: {
+    command: ['./app/**/commands'],
+    query: ['./app/**/queries'],
+  },
+
+  /**
+   * Optional: Configure custom publishers for commands and queries.
+   * If not provided, a default RxJS-based publisher is used.
+   *
+   * @example
+   * publishers: {
+   *   commands: new MyCustomCommandPublisher(), // Must implement BaseCommandPublisher
+   *   queries: new MyCustomQueryPublisher(),    // Must implement BaseQueryPublisher
+   * }
+   */
+  // publishers: {
+  //   commands: undefined,
+  //   queries: undefined,
+  // },
+
+  /**
+   * Root directory for Ace generator commands (e.g., `make:command`).
+   * This defines the base path where new commands and queries will be created.
+   *
+   * @default 'app'
+   */
+  generator: {
+    root: 'app',
+  },
+})

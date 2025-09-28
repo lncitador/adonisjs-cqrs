@@ -13,5 +13,32 @@
 */
 
 import ConfigureCommand from '@adonisjs/core/commands/configure'
+import { stubsRoot } from './stubs/main.js'
 
-export async function configure(_command: ConfigureCommand) {}
+export async function configure(command: ConfigureCommand) {
+  const codemods = await command.createCodemods()
+
+  /**
+   * Publish config file
+   */
+  await codemods.makeUsingStub(stubsRoot, 'config.stub', {})
+
+  /**
+   * Register provider
+   */
+  await codemods.updateRcFile((rcFile) => {
+    rcFile.addProvider('adonisjs-cqrs/providers/cqrs_provider')
+  })
+
+  /**
+   * Add commands to ace
+   */
+  await codemods.updateRcFile((rcFile) => {
+    rcFile.addCommand('adonisjs-cqrs/commands')
+  })
+
+  /**
+   * Install dependencies
+   */
+  await codemods.installPackages([{ name: 'rxjs', isDevDependency: true }])
+}
