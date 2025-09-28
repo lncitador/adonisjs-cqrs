@@ -1,7 +1,7 @@
 {
   "name": "adonisjs-cqrs",
   "description": "",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "engines": {
     "node": ">=20.6.0"
   },
