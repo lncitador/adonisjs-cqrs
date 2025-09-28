@@ -33,7 +33,7 @@ test.group('PubSub', (group) => {
     assert.deepEqual(receivedCommand, command)
   })
 
-  test('should use custom publisher if provided', async ({ assert }) => {
+  test('should use custom command publisher if provided', async ({ assert }) => {
     class TestPublisher implements BaseCommandPublisher {
       public command: any
 
