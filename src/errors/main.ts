@@ -1,1 +1,5 @@
 export * from './command_handler_not_found.js'
+export * from './invalid_command.js'
+export * from './invalid_handler.js'
+export * from './duplicate_command_handler.js'
+export * from './query_handler_not_found.js'
