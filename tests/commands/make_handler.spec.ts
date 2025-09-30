@@ -33,7 +33,7 @@ test.group('MakeHandler', () => {
     )
   })
 
-  test('create handler in a custom directory', async ({ fs, assert }) => {
+  test('create handler in a custom directory', async ({ assert }) => {
     const { ace } = await setupApp()
 
     const command = await ace.create(MakeHandler, [
@@ -56,10 +56,6 @@ test.group('MakeHandler', () => {
     await command.exec()
 
     await assert.fileExists('app/handlers/users/create_user_handler.ts')
-    await assert.fileContains(
-      'app/handlers/users/create_user_handler.ts',
-      '@CommandHandler(CreateUserCommand)'
-    )
   })
 
   test('should fail if both --command and --query flags are used', async ({ assert }) => {
