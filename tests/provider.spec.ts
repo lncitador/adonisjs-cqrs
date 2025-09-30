@@ -3,11 +3,12 @@ import { setupApp } from './helpers.js'
 import { CommandBus } from '../src/buses/command.js'
 import MakeCommand from '../commands/make_command.js'
 import { QueryBus } from '../src/buses/query.js'
+import MakeQuery from '../commands/make_query.js'
 
 test.group('QrpcProvider', async (group) => {
-  group.setup(async () => {
+  group.each.setup(async () => {
     const { ace } = await setupApp()
-    const createUserCommand = await ace.create(MakeCommand, ['get_user'])
+    const createUserCommand = await ace.create(MakeQuery, ['get_active_todos', '-d', 'todos'])
     const createTodosCommand = await ace.create(MakeCommand, ['create_todos', '-d', 'todos'])
     await Promise.all([createUserCommand.exec(), createTodosCommand.exec()])
   })
@@ -23,7 +24,7 @@ test.group('QrpcProvider', async (group) => {
 
     const createTodosCommand = await import(
       // @ts-ignore
-      './tmp/app/todos/commands/create_todos/create_todo_command.js'
+      './tmp/todos/commands/create_todo_command.js'
     )
 
     assert.deepEqual(await commandBus.dispatch(new createTodosCommand.default()), { success: true })
@@ -40,7 +41,7 @@ test.group('QrpcProvider', async (group) => {
 
     const getUserQuery = await import(
       // @ts-ignore
-      './tmp/app/queries/get_user/get_user_query.js'
+      './tmp/todos/queries/get_active_todo_query.js'
     )
 
     assert.deepEqual(await queryBus.execute(new getUserQuery.default()), { success: true })

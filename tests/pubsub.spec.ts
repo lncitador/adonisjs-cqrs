@@ -2,14 +2,18 @@ import { test } from '@japa/runner'
 import { setupApp } from './helpers.js'
 import { CommandBus } from '../src/buses/command.js'
 import MakeCommand from '../commands/make_command.js'
-import { defineConfig } from '../src/define_config.js'
+import { defineConfig, UNSAFE } from '../src/define_config.js'
 import { BaseCommandPublisher } from '../src/types/command.js'
+import MakeQuery from '../commands/make_query.js'
+import { BaseQueryPublisher } from '../src/types/query.js'
+import { QueryBus } from '../src/buses/query.js'
 
 test.group('PubSub', (group) => {
   group.each.setup(async () => {
     const { ace } = await setupApp()
-    const command = await ace.create(MakeCommand, ['test'])
-    await command.exec()
+    const testCommand = await ace.create(MakeCommand, ['tests/create_test'])
+    const testQuery = await ace.create(MakeQuery, ['tests/get_test'])
+    await Promise.all([testCommand.exec(), testQuery.exec()])
   })
 
   test('should publish command to subject', async ({ assert }) => {
@@ -18,7 +22,7 @@ test.group('PubSub', (group) => {
 
     const TestCommand = await import(
       // @ts-ignore
-      './tmp/app/commands/test/test_command.js'
+      './tmp/app/commands/tests/create_test_command.ts'
     )
 
     const command = new TestCommand.default()
@@ -47,6 +51,7 @@ test.group('PubSub', (group) => {
     const { app } = await setupApp({
       config: {
         cqrs: defineConfig({
+          [UNSAFE]: true,
           publishers: {
             commands: publisher,
           },
@@ -58,7 +63,7 @@ test.group('PubSub', (group) => {
 
     const TestCommand = await import(
       // @ts-ignore
-      './tmp/app/commands/test/test_command.js'
+      './tmp/app/commands/tests/create_test_command.ts'
     )
 
     const command = new TestCommand.default()
@@ -66,5 +71,62 @@ test.group('PubSub', (group) => {
     await commandBus.dispatch(command)
 
     assert.deepEqual(publisher.command, command)
+  })
+
+  test('should publish query to subject', async ({ assert }) => {
+    const { app } = await setupApp()
+    const queryBus = await app.container.make(QueryBus)
+
+    const TestQuery = await import(
+      // @ts-ignore
+      './tmp/app/queries/tests/get_test_query.ts'
+    )
+
+    const query = new TestQuery.default()
+    let receivedQuery: any
+
+    queryBus.subject$.subscribe((cmd) => {
+      receivedQuery = cmd
+    })
+
+    await queryBus.execute(query)
+
+    assert.deepEqual(receivedQuery, query)
+  })
+
+  test('should use custom query publisher if provided', async ({ assert }) => {
+    class TestPublisher implements BaseQueryPublisher {
+      public query: any
+
+      async publish(query: any) {
+        this.query = query
+      }
+    }
+
+    const publisher = new TestPublisher()
+
+    const { app } = await setupApp({
+      config: {
+        cqrs: defineConfig({
+          [UNSAFE]: true,
+          publishers: {
+            queries: publisher,
+          },
+        }),
+      },
+    })
+
+    const queryBus = await app.container.make(QueryBus)
+
+    const TestQuery = await import(
+      // @ts-ignore
+      './tmp/app/queries/tests/get_test_query.ts'
+    )
+
+    const query = new TestQuery.default()
+
+    await queryBus.execute(query)
+
+    assert.deepEqual(publisher.query, query)
   })
 })

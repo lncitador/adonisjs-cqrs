@@ -1,28 +1,29 @@
 import { test } from '@japa/runner'
 import { setupApp } from '../helpers.js'
 import MakeQuery from '../../commands/make_query.js'
+import { generators } from '../../src/generators.js'
 
 test.group('MakeQuery', () => {
   test('create query and handler files', async ({ assert }) => {
-    const { ace, prepareStub } = await setupApp()
+    const { ace, prepareStub, app } = await setupApp()
 
-    const command = await ace.create(MakeQuery, ['get_user'])
+    const name = 'users/get_user'
+    const command = await ace.create(MakeQuery, [name])
     await command.exec()
 
-    const name = 'get_user'
-    const destinationDir = `app/queries/${name}`
-
-    const queryPath = `${destinationDir}/get_user_query.ts`
-    const handlerPath = `${destinationDir}/get_user_handler.ts`
+    const queryPath = 'app/queries/users/get_user_query.ts'
+    const handlerPath = 'app/handlers/users/get_user_handler.ts'
 
     const { contents: queryContents } = await prepareStub('make/query.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.queries'],
+      generators,
     })
 
     const { contents: handlerContents } = await prepareStub('make/query_handler.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.handlers'],
+      generators,
     })
 
     await assert.fileExists(queryPath)
@@ -32,25 +33,25 @@ test.group('MakeQuery', () => {
   })
 
   test('create query and handler in a custom directory', async ({ assert }) => {
-    const { ace, prepareStub } = await setupApp()
-
-    const command = await ace.create(MakeQuery, ['get_order', '-d', 'orders'])
-    await command.exec()
+    const { ace, prepareStub, app } = await setupApp()
 
     const name = 'get_order'
-    const destinationDir = `app/orders/queries/${name}`
+    const command = await ace.create(MakeQuery, [name, '-d', 'orders'])
+    await command.exec()
 
-    const queryPath = `${destinationDir}/get_order_query.ts`
-    const handlerPath = `${destinationDir}/get_order_handler.ts`
+    const queryPath = 'orders/queries/get_order_query.ts'
+    const handlerPath = 'orders/handlers/get_order_handler.ts'
 
     const { contents: queryContents } = await prepareStub('make/query.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.queries'],
+      generators,
     })
 
     const { contents: handlerContents } = await prepareStub('make/query_handler.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.handlers'],
+      generators,
     })
 
     await assert.fileExists(queryPath)
@@ -64,27 +65,31 @@ test.group('MakeQuery', () => {
     ace.ui.switchMode('raw')
 
     const name = 'existing_file'
-    const destinationDir = `app/queries/${name}`
+    const queryPath = 'app/queries/existing_file_query.ts'
+    const handlerPath = 'app/handlers/existing_file_handler.ts'
 
-    const queryPath = `${destinationDir}/existing_file_query.ts`
-    const handlerPath = `${destinationDir}/existing_file_handler.ts`
-
-    await fs.create(queryPath, `// Existing query file`)
-    await fs.create(handlerPath, `// Existing handler file`)
+    await fs.create(queryPath, '// Existing query file')
+    await fs.create(handlerPath, '// Existing handler file')
 
     const command = await ace.create(MakeQuery, [name])
     await command.exec()
 
-    await assert.fileEquals(queryPath, `// Existing query file`)
-    await assert.fileEquals(handlerPath, `// Existing handler file`)
+    await assert.fileEquals(queryPath, '// Existing query file')
+    await assert.fileEquals(handlerPath, '// Existing handler file')
 
     assert.deepEqual(ace.ui.logger.getLogs(), [
       {
-        message: `cyan(SKIPPED:) create ${queryPath.replace(/\\/g, '/')} dim((File already exists))`,
+        message: `cyan(SKIPPED:) create ${queryPath.replace(
+          /\\/g,
+          '/'
+        )} dim((File already exists))`,
         stream: 'stdout',
       },
       {
-        message: `cyan(SKIPPED:) create ${handlerPath.replace(/\\/g, '/')} dim((File already exists))`,
+        message: `cyan(SKIPPED:) create ${handlerPath.replace(
+          /\\/g,
+          '/'
+        )} dim((File already exists))`,
         stream: 'stdout',
       },
     ])

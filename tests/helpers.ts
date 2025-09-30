@@ -1,5 +1,5 @@
 import { IgnitorFactory } from '@adonisjs/core/factories'
-import { defineConfig } from '../src/define_config.js'
+import { defineConfig, UNSAFE } from '../src/define_config.js'
 import { stubsRoot } from '../stubs/main.js'
 
 export const BASE_URL = new URL('./tmp/', import.meta.url)
@@ -27,9 +27,16 @@ export async function setupApp({ importer = IMPORTER, config = {} }: SetupAppOpt
     .merge({
       rcFileContents: {
         providers: [() => import('../providers/cqrs_provider.js')],
+        directories: {
+          'cqrs.commands': 'app/commands',
+          'cqrs.queries': 'app/queries',
+          'cqrs.handlers': 'app/handlers',
+        },
       },
       config: {
-        cqrs: defineConfig({}),
+        cqrs: defineConfig({
+          [UNSAFE]: true,
+        }),
         ...config,
       },
     })

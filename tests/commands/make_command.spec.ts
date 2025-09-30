@@ -1,28 +1,29 @@
 import { test } from '@japa/runner'
 import { setupApp } from '../helpers.js'
 import MakeCommand from '../../commands/make_command.js'
+import { generators } from '../../src/generators.js'
 
 test.group('MakeCommand', () => {
   test('create command and handler files', async ({ assert }) => {
-    const { ace, prepareStub } = await setupApp()
+    const { ace, prepareStub, app } = await setupApp()
 
-    const command = await ace.create(MakeCommand, ['create_user'])
+    const name = 'users/create_user'
+    const command = await ace.create(MakeCommand, [name])
     await command.exec()
 
-    const name = 'create_user'
-    const destinationDir = `app/commands/${name}`
-
-    const commandPath = `${destinationDir}/create_user_command.ts`
-    const handlerPath = `${destinationDir}/create_user_handler.ts`
+    const commandPath = 'app/commands/users/create_user_command.ts'
+    const handlerPath = 'app/handlers/users/create_user_handler.ts'
 
     const { contents: commandContents } = await prepareStub('make/command.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.commands'],
+      generators,
     })
 
     const { contents: handlerContents } = await prepareStub('make/command_handler.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.handlers'],
+      generators,
     })
 
     await assert.fileExists(commandPath)
@@ -32,25 +33,25 @@ test.group('MakeCommand', () => {
   })
 
   test('create command and handler in a custom directory', async ({ assert }) => {
-    const { ace, prepareStub } = await setupApp()
-
-    const command = await ace.create(MakeCommand, ['create_order', '-d', 'orders'])
-    await command.exec()
+    const { ace, prepareStub, app } = await setupApp()
 
     const name = 'create_order'
-    const destinationDir = `app/orders/commands/${name}`
+    const command = await ace.create(MakeCommand, [name, '-d', 'orders'])
+    await command.exec()
 
-    const commandPath = `${destinationDir}/create_order_command.ts`
-    const handlerPath = `${destinationDir}/create_order_handler.ts`
+    const commandPath = 'orders/commands/create_order_command.ts'
+    const handlerPath = 'orders/handlers/create_order_handler.ts'
 
     const { contents: commandContents } = await prepareStub('make/command.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.commands'],
+      generators,
     })
 
     const { contents: handlerContents } = await prepareStub('make/command_handler.stub', {
-      name,
-      destinationDir,
+      entity: app.generators.createEntity(name),
+      baseDir: app.rcFile.directories['cqrs.handlers'],
+      generators,
     })
 
     await assert.fileExists(commandPath)
@@ -64,32 +65,31 @@ test.group('MakeCommand', () => {
     ace.ui.switchMode('raw')
 
     const name = 'existing_file'
-    const destinationDir = `app/commands/${name}`
-    const commandPath = `${destinationDir}/existing_file_command.ts`
-    const handlerPath = `${destinationDir}/existing_file_handler.ts`
+    const commandPath = 'app/commands/existing_file_command.ts'
+    const handlerPath = 'app/handlers/existing_file_handler.ts'
 
-    await fs.create(commandPath, `// Existing command file`)
-    await fs.create(handlerPath, `// Existing handler file`)
+    await fs.create(commandPath, '// Existing command file')
+    await fs.create(handlerPath, '// Existing handler file')
 
     const command = await ace.create(MakeCommand, [name])
     await command.exec()
 
-    await assert.fileEquals(commandPath, `// Existing command file`)
-    await assert.fileEquals(handlerPath, `// Existing handler file`)
+    await assert.fileEquals(commandPath, '// Existing command file')
+    await assert.fileEquals(handlerPath, '// Existing handler file')
 
     assert.deepEqual(ace.ui.logger.getLogs(), [
       {
         message: `cyan(SKIPPED:) create ${commandPath.replace(
           /\\/g,
           '/'
-        )} dim((File already exists))`,
+        )} dim((File already exists))`, // Corrected escaping for backslash
         stream: 'stdout',
       },
       {
         message: `cyan(SKIPPED:) create ${handlerPath.replace(
           /\\/g,
           '/'
-        )} dim((File already exists))`,
+        )} dim((File already exists))`, // Corrected escaping for backslash
         stream: 'stdout',
       },
     ])
