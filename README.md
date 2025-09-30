@@ -32,160 +32,128 @@ node ace configure adonisjs-cqrs
 
 ## 💡 Usage
 
-### Commands
+### Configuration
 
-#### 1. Define a Command
+After installation, the package will add a new `directories` entry to your `.adonisrc.json` file. These paths are used by the `make` commands to generate files in the correct location.
 
-Commands are simple objects representing an action. The generic type `ICreateUserResult` defines the expected return type from the command's handler.
-
-```typescript
-// app/commands/create_user/create_user_command.ts
-import { Command } from 'adonisjs-cqrs/core'
-
-// Define the expected result type when this command is handled
-export type ICreateUserResult = { success: boolean; userId: string }
-
-interface CreateUserPayload {
-  name: string
-  email: string
-}
-
-export default class CreateUserCommand extends Command<ICreateUserResult> {
-  public payload: CreateUserPayload
-
-  constructor(payload: CreateUserPayload) {
-    super()
-    this.payload = payload
+```json
+// .adonisrc.json
+{
+  // ...
+  "directories": {
+    "cqrs.commands": "app/commands",
+    "cqrs.queries": "app/queries",
+    "cqrs.handlers": "app/handlers"
   }
 }
 ```
 
-#### 2. Define a Command Handler
+### Available Commands
 
-Command handlers contain the business logic to execute a specific command. They are automatically discovered and their dependencies are injected.
+This package provides a set of `ace` commands to speed up your development workflow.
 
-```typescript
-// app/commands/create_user/create_user_handler.ts
-import { inject } from '@adonisjs/core/container'
-import { CommandHandler } from 'adonisjs-cqrs/decorators'
-import CreateUserCommand, { ICreateUserResult } from './create_user_command.js'
-import { LoggerService } from '#app/services/logger_service' // Example service
+#### `make:cqrs:command`
 
-@inject()
-@CommandHandler(CreateUserCommand)
-export default class CreateUserHandler {
-  constructor(protected logger: LoggerService) {}
+Creates a new command and its corresponding handler.
 
-  async handle(command: CreateUserCommand): Promise<ICreateUserResult> {
-    this.logger.info('Creating user:', command.payload)
-    // Implement user creation logic here
-    return { success: true, userId: 'some-uuid' }
-  }
-}
+```bash
+# Create a new command and handler
+node ace make:cqrs:command User/CreateUser
+
+# Create only the command file
+node ace make:cqrs:command User/CreateUser --command-only
 ```
 
-#### 3. Dispatch a Command
+#### `make:cqrs:query`
 
-You can dispatch commands using the `CommandBus` instance, which can be resolved from the IoC container.
+Creates a new query and its corresponding handler.
 
-```typescript
-// app/controllers/users_controller.ts
-import { inject } from '@adonisjs/core/container'
-import { HttpContext } from '@adonisjs/core/http'
-import { CommandBus } from 'adonisjs-cqrs/buses'
-import CreateUserCommand from '#app/commands/create_user/create_user_command'
+```bash
+# Create a new query and handler
+node ace make:cqrs:query User/GetUser
 
-@inject()
-export default class UsersController {
-  constructor(protected commandBus: CommandBus) {}
-
-  async store({ request, response }: HttpContext) {
-    const payload = request.only(['name', 'email'])
-    const command = new CreateUserCommand(payload)
-
-    const result = await this.commandBus.dispatch(command)
-
-    return response.created(result)
-  }
-}
+# Create only the query file
+node ace make:cqrs:query User/GetUser --query-only
 ```
 
-### Queries
+#### `make:cqrs:handler`
 
-#### 1. Define a Query
+Creates a new handler for an existing command or query.
 
-Queries are simple objects representing a request for data. The generic type `IGetUserResult` defines the expected return type from the query's handler.
+```bash
+# Create a handler for a command
+node ace make:cqrs:handler User/CreateUser --command
 
-```typescript
-// app/queries/get_user/get_user_query.ts
-import { Query } from 'adonisjs-cqrs/core'
+# Create a handler for a query
+node ace make:cqrs:handler User/GetUser --query
 
-// Define the expected result type when this query is handled
-export type IGetUserResult = { id: string; name: string; email: string }
-
-interface GetUserPayload {
-  userId: string
-}
-
-export default class GetUserQuery extends Query<IGetUserResult> {
-  public payload: GetUserPayload
-
-  constructor(payload: GetUserPayload) {
-    super()
-    this.payload = payload
-  }
-}
+# Or run it interactively
+node ace make:cqrs:handler User/CreateUser
 ```
 
-#### 2. Define a Query Handler
+#### `list:handlers`
 
-Query handlers contain the logic to retrieve data. They are automatically discovered and their dependencies are injected.
+Lists all registered command and query handlers in your application. This is useful for debugging.
 
-```typescript
-// app/queries/get_user/get_user_handler.ts
-import { inject } from '@adonisjs/core/container'
-import { QueryHandler } from 'adonisjs-cqrs/decorators'
-import GetUserQuery, { IGetUserResult } from './get_user_query.js'
-import { UserRepository } from '#app/services/user_repository' // Example service
+```bash
+# Display handlers in a table
+node ace list:handlers
 
-@inject()
-@QueryHandler(GetUserQuery)
-export default class GetUserHandler {
-  constructor(protected userRepository: UserRepository) {}
-
-  async handle(query: GetUserQuery): Promise<IGetUserResult> {
-    this.logger.info('Fetching user:', query.payload.userId)
-    // Implement user fetching logic here
-    const user = await this.userRepository.findById(query.payload.userId)
-    return { id: user.id, name: user.name, email: user.email }
-  }
-}
+# Output as JSON
+node ace list:handlers --json
 ```
 
-#### 3. Execute a Query
+### Usage Example
 
-You can execute queries using the `QueryBus` instance, which can be resolved from the IoC container.
+1.  **Generate a Query and its Handler**:
 
-```typescript
-// app/controllers/users_controller.ts
-import { inject } from '@adonisjs/core/container'
-import { HttpContext } from '@adonisjs/core/http'
-import { QueryBus } from 'adonisjs-cqrs/buses'
-import GetUserQuery from '#app/queries/get_user/get_user_query'
+    ```bash
+    node ace make:cqrs:query User/GetUser
+    ```
 
-@inject()
-export default class UsersController {
-  constructor(protected queryBus: QueryBus) {}
+    This will create `app/queries/user/get_user_query.ts` and `app/handlers/user/get_user_handler.ts`.
 
-  async show({ params, response }: HttpContext) {
-    const query = new GetUserQuery({ userId: params.id })
+2.  **Implement the Handler**:
 
-    const result = await this.queryBus.execute(query)
+    Fill in the business logic inside the generated handler file.
 
-    return response.ok(result)
-  }
-}
-```
+    ```typescript
+    // app/handlers/user/get_user_handler.ts
+    import { QueryHandler } from 'adonisjs-cqrs/decorators'
+    import GetUserQuery from '#queries/user/get_user_query'
+    // ...
+
+    @QueryHandler(GetUserQuery)
+    export default class GetUserHandler {
+      public async handle(query: GetUserQuery) {
+        // Your logic to fetch a user
+        console.log('Fetching user:', query.userId)
+        return { id: query.userId, name: 'John Doe' }
+      }
+    }
+    ```
+
+3.  **Execute the Query**:
+
+    Use the `QueryBus` to execute the query from anywhere in your app, like a controller.
+
+    ```typescript
+    // app/controllers/users_controller.ts
+    import { inject } from '@adonisjs/core'
+    import { QueryBus } from 'adonisjs-cqrs/buses'
+    import GetUserQuery from '#queries/user/get_user_query'
+
+    @inject()
+    export default class UsersController {
+      constructor(protected queryBus: QueryBus) {}
+
+      async show({ params }: HttpContext) {
+        const query = new GetUserQuery(params.id)
+        const user = await this.queryBus.execute(query)
+        return user
+      }
+    }
+    ```
 
 ## 🤝 Contributing
 
