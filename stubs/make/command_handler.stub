@@ -1,19 +1,19 @@
-{{#var handlerName = string(name).singular().pascalCase().toString()}}
-{{#var commandName = string(name).singular().pascalCase().toString()}}
-{{#var handlerFileName = string(name).singular().snakeCase().suffix('_handler').ext('.ts').toString()}}
-{{#var commandFileName = string(name).singular().snakeCase().suffix('_command').toString()}}
+{{#var handlerName = generators.handlerName(entity.name)}}
+{{#var commandName = generators.commandName(entity.name)}}
+{{#var handlerFileName = generators.handlerFileName(entity.name)}}
+{{#var commandFileName = generators.commandFileName(entity.name)}}
 {{{
   exports({
-    to: app.makePath(destinationDir, handlerFileName)
+    to: app.makePath(baseDir, entity.path, handlerFileName)
   })
 }}}
 import { CommandHandler } from 'adonisjs-cqrs/decorators'
 import { BaseCommandHandler } from 'adonisjs-cqrs/types'
-import {{ commandName }}Command from './{{ commandFileName }}.js'
+import {{ commandName }} from '{{ generators.commandImport(entity) }}'
 
-@CommandHandler({{ commandName }}Command)
-export default class {{ handlerName }}Handler implements BaseCommandHandler<{{ commandName }}Command> {
-  async handle(command: {{ commandName }}Command) {
+@CommandHandler({{ commandName }})
+export default class {{ handlerName }} implements BaseCommandHandler<{{ commandName }}> {
+  async handle(command: {{ commandName }}) {
     // Command logic here
 
     return { success: true }

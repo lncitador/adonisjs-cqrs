@@ -1,10 +1,10 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/ace'
 import { stubsRoot } from '../stubs/main.js'
-import { CqrsConfig } from '../src/types/config.js'
 import { CommandOptions } from '@adonisjs/core/types/ace'
+import { generators } from '../src/generators.js'
 
 export default class MakeCommand extends BaseCommand {
-  static commandName = 'make:command'
+  static commandName = 'make:cqrs:command'
   static description = 'Create a new CQRS command and handler'
 
   static options: CommandOptions = {
@@ -15,12 +15,12 @@ export default class MakeCommand extends BaseCommand {
   declare name: string
 
   @flags.boolean({
-    description: 'Create the corresponding command handler as well',
-    alias: 'h',
-    default: true,
+    description: 'Create only the command',
+    alias: 'o',
+    default: false,
     required: false,
   })
-  declare handler?: boolean
+  declare commandOnly?: boolean
 
   @flags.string({
     description: 'The domain directory to create the command in',
@@ -31,28 +31,30 @@ export default class MakeCommand extends BaseCommand {
 
   async run() {
     const codemods = await this.createCodemods()
-    const config: CqrsConfig = this.app.config.get('cqrs')
-    const root = config.generator.root
+    const root = this.app.rcFile.directories['cqrs.commands']
 
-    const baseDir = this.directory ? `${root}/${this.directory}` : root
-    const destinationDir = `${baseDir}/commands/${this.name}`
+    const baseDir = this.directory ? `${this.directory}/commands` : root
 
     await codemods.makeUsingStub(stubsRoot, 'make/command.stub', {
-      name: this.name,
-      destinationDir: destinationDir,
+      entity: this.app.generators.createEntity(this.name),
+      baseDir,
+      generators,
     })
 
-    if (this.handler) {
-      await this.createHandler(destinationDir)
+    if (!this.commandOnly) {
+      await this.createHandler()
     }
   }
 
-  private async createHandler(destinationDir: string) {
+  private async createHandler() {
     const codemods = await this.createCodemods()
+    const root = this.app.rcFile.directories['cqrs.handlers']
+    const baseDir = this.directory ? `${this.directory}/handlers` : root
 
     await codemods.makeUsingStub(stubsRoot, 'make/command_handler.stub', {
-      name: this.name,
-      destinationDir: destinationDir,
+      entity: this.app.generators.createEntity(this.name),
+      baseDir,
+      generators,
     })
   }
 }

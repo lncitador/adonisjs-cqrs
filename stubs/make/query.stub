@@ -1,8 +1,8 @@
-{{#var queryName = string(name).singular().pascalCase().toString()}}
-{{#var queryFileName = string(name).singular().snakeCase().suffix('_query').ext('.ts').toString()}}
+{{#var queryName = generators.queryName(entity.name)}}
+{{#var queryFileName = generators.queryFileName(entity.name)}}
 {{{
   exports({
-    to: app.makePath(destinationDir, queryFileName)
+    to: app.makePath(baseDir, entity.path, queryFileName)
   })
 }}}
 import { Query } from 'adonisjs-cqrs/core'
@@ -10,7 +10,7 @@ import { Query } from 'adonisjs-cqrs/core'
 // Define the result type for this query
 export type I{{ queryName }}Result = { success: boolean }
 
-export default class {{ queryName }}Query extends Query<I{{ queryName }}Result> {
+export default class {{ queryName }} extends Query<I{{ queryName }}Result> {
   constructor() {
     super()
   }

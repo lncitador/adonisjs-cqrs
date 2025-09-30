@@ -1,8 +1,8 @@
-{{#var commandName = string(name).singular().pascalCase().toString()}}
-{{#var commandFileName = string(name).singular().snakeCase().suffix('_command').ext('.ts').toString()}}
+{{#var commandName = generators.commandName(entity.name)}}
+{{#var commandFileName = generators.commandFileName(entity.name)}}
 {{{
   exports({
-    to: app.makePath(destinationDir, commandFileName)
+    to: app.makePath(baseDir, entity.path, commandFileName)
   })
 }}}
 import { Command } from 'adonisjs-cqrs/core'
@@ -10,7 +10,7 @@ import { Command } from 'adonisjs-cqrs/core'
 // Define the result type for this command
 export type I{{ commandName }}Result = { success: boolean }
 
-export default class {{ commandName }}Command extends Command<I{{ commandName }}Result> {
+export default class {{ commandName }} extends Command<I{{ commandName }}Result> {
   constructor() {
     super()
   }
