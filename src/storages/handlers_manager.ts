@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { Logger } from '@adonisjs/core/logger'
 import { Type } from '../types/shared.js'
 import { METADATA_MAP } from '../decorators/constants.js'
@@ -6,7 +7,7 @@ import { DuplicateCommandHandlerException } from '../errors/main.js'
 export const HANDLER_TYPES = ['command', 'query', 'event'] as const
 export type HandlerType = (typeof HANDLER_TYPES)[number]
 
-type HandlerRegistration = {
+export type HandlerRegistration = {
   filePath: string
   subjectName: string
   handlerName: string
@@ -25,7 +26,7 @@ export class HandlersManager {
   }
 
   public registerHandler(
-    type: keyof typeof METADATA_MAP, // Garante que só podemos registrar tipos que temos metadados mapeados
+    type: keyof typeof METADATA_MAP,
     subjectClass: new (...args: any[]) => any,
     handlerClass: new (...args: any[]) => any,
     filePath: string
@@ -57,7 +58,25 @@ export class HandlersManager {
     return this.#storage[type]?.get(subjectId)
   }
 
-  public getRegisteredHandlers(type: HandlerType) {
+  public getRegisteredHandlers(): {
+    command: HandlerRegistration[]
+    query: HandlerRegistration[]
+    event: HandlerRegistration[]
+    total: number
+  }
+  public getRegisteredHandlers(type: HandlerType): HandlerRegistration[]
+  public getRegisteredHandlers(type?: HandlerType): any {
+    if (!type) {
+      return {
+        command: this.getRegisteredHandlers('command'),
+        query: this.getRegisteredHandlers('query'),
+        event: this.getRegisteredHandlers('event'),
+        get total(): number {
+          return this.command.length + this.query.length + this.event.length
+        },
+      }
+    }
+
     const handlerMap = this.#storage[type]
     if (!handlerMap) {
       return []
@@ -68,7 +87,6 @@ export class HandlersManager {
     }))
   }
 
-  // Método de reflexão agora é genérico
   private reflectSubjectId(
     type: keyof typeof METADATA_MAP,
     handler: Type<any>
