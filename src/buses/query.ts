@@ -10,6 +10,8 @@ import { Type } from '../types/shared.js'
 import { QueryHandlerNotFoundException } from '../errors/query_handler_not_found.js'
 import { Logger } from '@adonisjs/core/logger'
 import { HandlersManager } from '../storages/handlers_manager.js'
+import { InvalidQueryException } from '../errors/invalid_query.js'
+import { UNSAFE } from '../define_config.js'
 
 export type QueryHandlerType<T extends BaseQuery = BaseQuery> = Type<BaseQueryHandler<T>>
 
@@ -22,6 +24,7 @@ export class QueryBus<TQuery extends BaseQuery = BaseQuery>
   #logger: Logger
   #config: CqrsConfig
   #handlersManager: HandlersManager
+  #unsafe: boolean
 
   constructor(
     app: Application<any>,
@@ -36,6 +39,8 @@ export class QueryBus<TQuery extends BaseQuery = BaseQuery>
     this.#logger = logger
     this.#config = config
 
+    this.#unsafe = config[UNSAFE] || false
+
     if (this.#config?.publishers?.queries) {
       this.#publisher = this.#config.publishers.queries
     } else {
@@ -44,6 +49,10 @@ export class QueryBus<TQuery extends BaseQuery = BaseQuery>
   }
 
   public async execute<T extends TQuery>(query: T): Promise<T extends Query<infer R> ? R : any> {
+    if (!(query instanceof Query) && !this.#unsafe) {
+      throw new InvalidQueryException()
+    }
+
     const queryId = this.getQueryId(query)
     const queryName = this.getQueryName(query)
 

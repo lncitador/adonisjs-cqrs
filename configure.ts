@@ -1,17 +1,6 @@
-/*
-|--------------------------------------------------------------------------
-| Configure hook
-|--------------------------------------------------------------------------
-|
-| The configure hook is called when someone runs "node ace configure <package>"
-| command. You are free to perform any operations inside this function to
-| configure the package.
-|
-| To make things easier, you have access to the underlying "ConfigureCommand"
-| instance and you can use codemods to modify the source files.
-|
-*/
-
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { readFileSync, writeFileSync } from 'node:fs'
 import ConfigureCommand from '@adonisjs/core/commands/configure'
 import { stubsRoot } from './stubs/main.js'
 
@@ -31,14 +20,34 @@ export async function configure(command: ConfigureCommand) {
   })
 
   /**
-   * Add commands to ace
+   * Add commands to ace and set directories
    */
   await codemods.updateRcFile((rcFile) => {
     rcFile.addCommand('adonisjs-cqrs/commands')
+    rcFile.setDirectory("'cqrs.commands'", 'app/commands')
+    rcFile.setDirectory("'cqrs.queries'", 'app/queries')
+    rcFile.setDirectory("'cqrs.handlers'", 'app/handlers')
   })
 
   /**
    * Install dependencies
    */
   await codemods.installPackages([{ name: 'rxjs', isDevDependency: true }])
+
+  /**
+   * Read and update imports in package.json
+   */
+  const packageJson = JSON.parse(
+    readFileSync(path.join(fileURLToPath(command.app.appRoot), 'package.json'), 'utf-8')
+  )
+
+  packageJson.imports['#commands/*'] = './app/commands/*.js'
+  packageJson.imports['#queries/*'] = './app/queries/*.js'
+  packageJson.imports['#handlers/*'] = './app/handlers/*.js'
+
+  writeFileSync(
+    path.join(fileURLToPath(command.app.appRoot), 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+    'utf-8'
+  )
 }

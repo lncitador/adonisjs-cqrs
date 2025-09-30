@@ -1,10 +1,9 @@
+import { UNSAFE } from '../define_config.js'
 import { BaseCommandPublisher } from './command.js'
 import { BaseQueryPublisher } from './query.js'
 
-export type DirectoryType = 'command' | 'query'
-
 export type CqrsConfig = {
-  directories: Record<DirectoryType, string | string[]>
+  [UNSAFE]: boolean
   publishers?: {
     commands?: BaseCommandPublisher
     queries?: BaseQueryPublisher

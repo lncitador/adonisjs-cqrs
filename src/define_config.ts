@@ -1,18 +1,17 @@
 import { CqrsConfig } from './types/config.js'
 
+export const UNSAFE = Symbol('UNSAFE')
+
 const defaultConfig: CqrsConfig = {
-  directories: {
-    command: ['./app/**/commands'],
-    query: ['./app/**/queries'],
-  },
+  [UNSAFE]: false,
   generator: {
     root: 'app',
   },
 }
 
-export function defineConfig(config: Partial<CqrsConfig> = {}): CqrsConfig {
+export function defineConfig(config: Partial<CqrsConfig> = {}) {
   return {
     ...defaultConfig,
     ...config,
-  }
+  } as CqrsConfig
 }

@@ -13,15 +13,8 @@ import { defineConfig } from 'adonisjs-cqrs'
  * and generator settings.
  */
 export default defineConfig({
-  /**
-   * Directories where your commands and queries are located.
-   * Handlers will be automatically discovered within these paths.
-   * Supports glob patterns.
-   */
-  directories: {
-    command: ['./app/**/commands'],
-    query: ['./app/**/queries'],
-  },
+  // The 'directories' configuration is now managed in the .adonisrc.json file.
+  // You can configure the paths for commands, queries, and handlers there.
 
   /**
    * Optional: Configure custom publishers for commands and queries.
@@ -39,7 +32,7 @@ export default defineConfig({
   // },
 
   /**
-   * Root directory for Ace generator commands (e.g., \`make:command\`).
+   * Root directory for Ace generator commands (e.g., `make:cqrs:command`).
    * This defines the base path where new commands and queries will be created.
    *
    * @default 'app'

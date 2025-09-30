@@ -15,6 +15,8 @@ import { Type } from '../types/shared.js'
 import { CommandHandlerNotFoundException } from '../errors/command_handler_not_found.js'
 import { Logger } from '@adonisjs/core/logger'
 import { HandlersManager } from '../storages/handlers_manager.js'
+import { InvalidCommandException } from '../errors/invalid_command.js'
+import { UNSAFE } from '../define_config.js'
 
 export type CommandHandlerType<T extends BaseCommand = BaseCommand> = Type<BaseCommandHandler<T>>
 
@@ -27,6 +29,7 @@ export class CommandBus<TCommand extends BaseCommand = BaseCommand>
   #logger: Logger
   #config: CqrsConfig
   #handlersManager: HandlersManager
+  #unsafe: boolean
 
   constructor(
     app: Application<any>,
@@ -41,6 +44,8 @@ export class CommandBus<TCommand extends BaseCommand = BaseCommand>
     this.#logger = logger
     this.#config = config
 
+    this.#unsafe = config[UNSAFE] || false
+
     if (this.#config?.publishers?.commands) {
       this.#publisher = this.#config.publishers.commands
     } else {
@@ -51,6 +56,10 @@ export class CommandBus<TCommand extends BaseCommand = BaseCommand>
   public async dispatch<T extends TCommand>(
     command: T
   ): Promise<T extends Command<infer R> ? R : any> {
+    if (!(command instanceof Command) && !this.#unsafe) {
+      throw new InvalidCommandException()
+    }
+
     const commandId = this.getCommandId(command)
     const commandName = this.getCommandName(command)
 
