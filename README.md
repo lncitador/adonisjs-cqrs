@@ -34,10 +34,10 @@ node ace configure adonisjs-cqrs
 
 ### Configuration
 
-After installation, the package will add a new `directories` entry to your `.adonisrc.json` file. These paths are used by the `make` commands to generate files in the correct location.
+After installation, the package will add a new `directories` entry to your `adonisrc.ts` file. These paths are used by the `make` commands to generate files in the correct location.
 
 ```json
-// .adonisrc.json
+// adonisrc.ts
 {
   // ...
   "directories": {

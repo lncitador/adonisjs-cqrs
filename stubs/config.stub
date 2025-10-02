@@ -13,7 +13,7 @@ import { defineConfig } from 'adonisjs-cqrs'
  * and generator settings.
  */
 export default defineConfig({
-  // The 'directories' configuration is now managed in the .adonisrc.json file.
+  // The 'directories' configuration is now managed in the adonisrc.ts file.
   // You can configure the paths for commands, queries, and handlers there.
 
   /**
