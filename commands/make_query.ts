@@ -1,6 +1,6 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/ace'
 import { stubsRoot } from '../stubs/main.js'
-import { CommandOptions } from '@adonisjs/core/types/ace'
+import { type CommandOptions } from '@adonisjs/core/types/ace'
 import { generators } from '../src/generators.js'
 
 export default class MakeQuery extends BaseCommand {

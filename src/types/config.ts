@@ -1,6 +1,6 @@
-import { UNSAFE } from '../define_config.js'
-import { BaseCommandPublisher } from './command.js'
-import { BaseQueryPublisher } from './query.js'
+import { type UNSAFE } from '../define_config.js'
+import { type BaseCommandPublisher } from './command.js'
+import { type BaseQueryPublisher } from './query.js'
 
 export type CqrsConfig = {
   [UNSAFE]: boolean

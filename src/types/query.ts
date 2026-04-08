@@ -1,4 +1,4 @@
-import { Query } from '../core/query.js'
+import { type Query } from '../core/query.js'
 
 export interface BaseQuery {}
 

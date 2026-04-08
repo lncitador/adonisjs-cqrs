@@ -1,4 +1,4 @@
-import { BaseCommand } from '../types/command.js'
+import { type BaseCommand } from '../types/command.js'
 import { RESULT_TYPE_SYMBOL } from './constants.js'
 
 export class Command<T> implements BaseCommand {

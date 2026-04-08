@@ -1,6 +1,6 @@
 import 'reflect-metadata'
-import { Logger } from '@adonisjs/core/logger'
-import { Type } from '../types/shared.js'
+import { type Logger } from '@adonisjs/core/logger'
+import { type Type } from '../types/shared.js'
 import { METADATA_MAP } from '../decorators/constants.js'
 import { DuplicateCommandHandlerException } from '../errors/main.js'
 

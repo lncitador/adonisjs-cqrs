@@ -1,6 +1,6 @@
 import { CommandBus } from '../src/buses/command.js'
-import { Application } from '@adonisjs/core/app'
-import { CqrsConfig } from '../src/types/config.js'
+import { type Application } from '@adonisjs/core/app'
+import { type CqrsConfig } from '../src/types/config.js'
 import { Logger } from '@adonisjs/core/logger'
 import { defineConfig } from '../src/define_config.js'
 import { HandlersManager } from '../src/storages/handlers_manager.js'

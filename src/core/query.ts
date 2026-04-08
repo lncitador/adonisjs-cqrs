@@ -1,4 +1,4 @@
-import { BaseQuery } from '../types/query.js'
+import { type BaseQuery } from '../types/query.js'
 import { RESULT_TYPE_SYMBOL } from './constants.js'
 
 export class Query<T> implements BaseQuery {

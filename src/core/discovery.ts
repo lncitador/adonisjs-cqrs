@@ -1,7 +1,7 @@
 import { glob } from 'glob'
-import { Application } from '@adonisjs/core/app'
+import { type Application } from '@adonisjs/core/app'
 import { InvalidHandlerException } from '../errors/main.js'
-import { Type } from '../types/shared.js'
+import { type Type } from '../types/shared.js'
 import { debug } from '../debug.js'
 
 export interface DiscoveredHandler {

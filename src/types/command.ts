@@ -1,4 +1,4 @@
-import { Command } from '../core/command.js'
+import { type Command } from '../core/command.js'
 
 export interface BaseCommand {}
 

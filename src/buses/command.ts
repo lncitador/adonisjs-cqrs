@@ -1,20 +1,20 @@
 import 'reflect-metadata'
-import { Application } from '@adonisjs/core/app'
+import { type Application } from '@adonisjs/core/app'
 import { Command } from '../core/command.js'
 import { DefaultCommandPubSub } from '../pubsub/command.js'
 import {
-  BaseCommand,
-  BaseCommandBus,
-  BaseCommandPublisher,
-  BaseCommandHandler,
+  type BaseCommand,
+  type BaseCommandBus,
+  type BaseCommandPublisher,
+  type BaseCommandHandler,
 } from '../types/command.js'
 import { ObservableBus } from './observable.js'
-import { CqrsConfig } from '../types/config.js'
+import { type CqrsConfig } from '../types/config.js'
 import { COMMAND_METADATA } from '../decorators/constants.js'
-import { Type } from '../types/shared.js'
+import { type Type } from '../types/shared.js'
 import { CommandHandlerNotFoundException } from '../errors/command_handler_not_found.js'
-import { Logger } from '@adonisjs/core/logger'
-import { HandlersManager } from '../storages/handlers_manager.js'
+import { type Logger } from '@adonisjs/core/logger'
+import { type HandlersManager } from '../storages/handlers_manager.js'
 import { InvalidCommandException } from '../errors/invalid_command.js'
 import { UNSAFE } from '../define_config.js'
 

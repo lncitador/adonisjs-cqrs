@@ -1,5 +1,5 @@
 import { BaseCommand, args, flags } from '@adonisjs/core/ace'
-import { CommandOptions } from '@adonisjs/core/types/ace'
+import { type CommandOptions } from '@adonisjs/core/types/ace'
 import MakeCommand from './make_command.js'
 import MakeQuery from './make_query.js'
 

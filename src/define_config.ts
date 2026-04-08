@@ -1,4 +1,4 @@
-import { CqrsConfig } from './types/config.js'
+import { type CqrsConfig } from './types/config.js'
 
 export const UNSAFE = Symbol('UNSAFE')
 

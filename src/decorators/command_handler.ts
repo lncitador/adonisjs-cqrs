@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { BaseCommand } from '../types/command.js'
+import { type BaseCommand } from '../types/command.js'
 import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from './constants.js'
 import { randomUUID } from 'node:crypto'
 

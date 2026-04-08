@@ -3,9 +3,9 @@ import { setupApp } from './helpers.js'
 import { CommandBus } from '../src/buses/command.js'
 import MakeCommand from '../commands/make_command.js'
 import { defineConfig, UNSAFE } from '../src/define_config.js'
-import { BaseCommandPublisher } from '../src/types/command.js'
+import { type BaseCommandPublisher } from '../src/types/command.js'
 import MakeQuery from '../commands/make_query.js'
-import { BaseQueryPublisher } from '../src/types/query.js'
+import { type BaseQueryPublisher } from '../src/types/query.js'
 import { QueryBus } from '../src/buses/query.js'
 
 test.group('PubSub', (group) => {

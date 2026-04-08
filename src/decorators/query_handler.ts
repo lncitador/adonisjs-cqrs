@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { QUERY_HANDLER_METADATA, QUERY_METADATA } from './constants.js'
 import { randomUUID } from 'node:crypto'
-import { BaseQuery } from '../types/query.js'
+import { type BaseQuery } from '../types/query.js'
 
 export const QueryHandler = (
   query: BaseQuery | (new (...args: any[]) => BaseQuery)

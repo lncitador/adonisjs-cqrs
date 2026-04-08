@@ -1,15 +1,20 @@
 import 'reflect-metadata'
-import { Application } from '@adonisjs/core/app'
+import { type Application } from '@adonisjs/core/app'
 import { Query } from '../core/query.js'
 import { DefaultQueryPubSub } from '../pubsub/query.js'
-import { BaseQuery, BaseQueryBus, BaseQueryHandler, BaseQueryPublisher } from '../types/query.js'
+import {
+  type BaseQuery,
+  type BaseQueryBus,
+  type BaseQueryHandler,
+  type BaseQueryPublisher,
+} from '../types/query.js'
 import { ObservableBus } from './observable.js'
-import { CqrsConfig } from '../types/config.js'
+import { type CqrsConfig } from '../types/config.js'
 import { QUERY_METADATA } from '../decorators/constants.js'
-import { Type } from '../types/shared.js'
+import { type Type } from '../types/shared.js'
 import { QueryHandlerNotFoundException } from '../errors/query_handler_not_found.js'
-import { Logger } from '@adonisjs/core/logger'
-import { HandlersManager } from '../storages/handlers_manager.js'
+import { type Logger } from '@adonisjs/core/logger'
+import { type HandlersManager } from '../storages/handlers_manager.js'
 import { InvalidQueryException } from '../errors/invalid_query.js'
 import { UNSAFE } from '../define_config.js'
 

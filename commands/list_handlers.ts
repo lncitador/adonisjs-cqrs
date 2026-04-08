@@ -1,7 +1,7 @@
 import { BaseCommand, flags } from '@adonisjs/core/ace'
 import { HandlersManager } from '../src/storages/handlers_manager.js'
-import { HandlerRegistration } from '../src/storages/handlers_manager.js'
-import { CommandOptions } from '@adonisjs/core/types/ace'
+import { type HandlerRegistration } from '../src/storages/handlers_manager.js'
+import { type CommandOptions } from '@adonisjs/core/types/ace'
 
 export default class ListHandlers extends BaseCommand {
   static commandName = 'list:handlers'
